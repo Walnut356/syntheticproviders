@@ -1,0 +1,51 @@
+command script import "C:\Users\ant_b\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\etc\lldb_lookup.py" --allow-reload
+command script import "C:\Users\ant_b\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\etc\lldb_providers.py" --allow-reload
+type category enable Rust
+
+# Builtins
+#type synthetic add -l lldb_providers.Stdu8SyntheticProvider -x -p "^unsigned char$" --category Rust
+#type synthetic add -l lldb_providers.BasicSyntheticProvider -x "^(unsigned |signed )?(char|(long )?long)$" --category Rust
+#type synthetic add -l lldb_providers.DefaultSyntheticProvider -x -p "^unsigned char$" --category Rust
+type synthetic add -l lldb_providers.DefaultSyntheticProvider -x -p "^float$" --category Rust
+type synthetic add -l lldb_providers.DefaultSyntheticProvider -x -p "^double$" --category Rust
+#type summary add -F lldb_providers.u8_summary_provider -e -h -x "^unsigned char$" --category Rust
+type summary add -F lldb_providers.u8_summary_provider -e -h -x "^char$" --category Rust
+# float/double
+type summary add --python-script "return str(valobj.GetData().floats)[1:-1]" float --category Rust
+type summary add --python-script "return str(valobj.GetData().doubles)[1:-1]" double --category Rust
+# array
+type synthetic add -l lldb_providers.ArraySyntheticProvider -x "^.*\[[0-9]+\]$" --category Rust
+# type summary add -F lldb_providers.ArraySummaryProvider -e -h -x "^.*\[[0-9]+\]$" --category Rust
+# ptr/ref
+type synthetic add -l lldb_providers.RefSyntheticProvider -x "^(const )?.* &$" --category Rust
+type synthetic add -l lldb_providers.RefSyntheticProvider -x "^(const )?.*&&$" --category Rust
+type synthetic add -l lldb_providers.RefSyntheticProvider -x "^(const )?.* \*$" --category Rust
+type summary add -F lldb_providers.RefSummaryProvider -e -h -x "^(const )?.* &$" --category Rust
+type summary add -F lldb_providers.RefSummaryProvider -e -h -x "^(const )?.*&&$" --category Rust
+type summary add -F lldb_providers.RefSummaryProvider -e -h -x "^(const )?.* \*$" --category Rust
+
+# MSVC slice
+type synthetic add -l lldb_providers.StdSliceSyntheticProvider -x "^ref\$<slice2\$<.+> >$" --category Rust
+type summary add -F lldb_providers.StdSliceSummaryProvider -e -h -x "^ref\$<slice2\$<.+> >$" --category Rust
+# MSVC mut slice
+type synthetic add -l lldb_providers.StdSliceSyntheticProvider -x "^ref_mut\$<slice2\$<.+> >$" --category Rust
+type summary add -F lldb_providers.StdSliceSummaryProvider -e -h -x "^ref_mut\$<slice2\$<.+> >$" --category Rust
+# MSVC Vec
+type synthetic add -l lldb_providers.MSVCStdVecSyntheticProvider -x "^(alloc::([a-z_]+::)+)Vec<.+>$" --category Rust
+type summary add -F lldb_providers.StdVecSummaryProvider -e -h -x "^(alloc::([a-z_]+::)+)Vec<.+>$" --category Rust
+# MSVC Tuple
+type synthetic add -l lldb_providers.MSVCTupleSyntheticProvider -x "^tuple\$<.+>$" --category Rust
+type summary add -F lldb_providers.TupleSummaryProvider -e -h -x "^tuple\$<.+>$" --category Rust
+# MSVC Unit
+type synthetic add -l lldb_providers.MSVCUnitSyntheticProvider -x "^tuple\$<>$" --category Rust
+# MSVC &str
+type synthetic add -l lldb_providers.MSVCstrSyntheticProvider -x "^ref\$<str\$>$" --category Rust
+type summary add -F lldb_providers.MSVCstrSummaryProvider -e -h -x "^ref\$<str\$>$" --category Rust
+# String
+type synthetic add -l lldb_providers.StdStringSyntheticProvider -x "^(alloc::([a-z_]+::)+)String" --category Rust
+type summary add -F lldb_providers.StdStringSummaryProvider -e -h -x "^(alloc::([a-z_]+::)+)String" --category Rust
+# MSVC Enum
+type synthetic add -l lldb_providers.MSVCEnumSyntheticProvider -x "^enum2\$<.+>$" --category Rust
+type summary add -F lldb_providers.MSVCEnumSummaryProvider -e -h -x "^enum2\$<.+>$" --category Rust
+# std Option
+type synthetic add -l lldb_providers.OptionSyntheticProvider -x "^enum2\$<core::option::Option<.+> >$" --category Rust
